@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "module": "universal_storage_fix",
+  "version": "0.1.0",
+  "build": 1,
+  "channel": "stable",
+  "commit": "UNRELEASED",
+  "release_date": "2026-09-12",
+  "changelog": "Initial safety-first diagnostics release.",
+  "compatibility": {"android_api_min": 34, "android_api_max": 37, "abis": ["arm64-v8a"]},
+  "artifacts": [{"name": "Universal-Storage-Fix-0.1.0.zip", "url": null, "sha256": null}],
+  "signature": null,
+  "migration_requirements": [],
+  "security_update": false,
+  "breaking_change": false
+}

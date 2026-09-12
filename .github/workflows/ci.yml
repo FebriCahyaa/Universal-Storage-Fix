@@ -1,0 +1,22 @@
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Shell syntax
+        run: sh -n module/action.sh module/service.sh module/lib/usf.sh tools/security/generate-checksums.sh tools/security/verify-checksums.sh tools/telegram/notify-build.sh
+      - name: Native and shell tests
+        run: make test
+      - name: Package and verify integrity
+        run: make package checksums && tools/security/verify-checksums.sh dist/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Universal-Storage-Fix
+          path: dist/

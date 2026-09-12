@@ -1,0 +1,6 @@
+id=universal_storage_fix
+name=Universal Storage Fix
+version=0.1.0
+versionCode=1
+author=Universal Storage Fix contributors
+description=Safety-first storage diagnostics and reversible module-owned remediation.
