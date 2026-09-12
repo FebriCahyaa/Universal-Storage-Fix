@@ -1,0 +1,9 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Universal Storage Fix</title><link rel="stylesheet" href="style.css"></head>
+<body><main><header><div><p class="eyebrow">SAFETY-FIRST ROOT MODULE</p><h1>Universal Storage Fix</h1><p id="connection">Restricted bridge unavailable — diagnostics are read-only.</p></div><button id="scan">Scan</button></header>
+<nav><a href="#dashboard">Dashboard</a><a href="#diagnostics">Diagnostics</a><a href="#fixes">Fix Center</a><a href="#updates">Updates</a><a href="#settings">Settings</a></nav>
+<section id="dashboard"><h2>Runtime</h2><dl id="runtime"><dt>State</dt><dd>Waiting for local diagnostic data</dd></dl></section>
+<section id="diagnostics"><h2>Diagnostics</h2><pre id="diagnostic">No scan loaded.</pre></section>
+<section id="fixes"><h2>Fix Center</h2><p>Only module-owned state can be changed. A preview is mandatory before a mutation.</p><div id="fixes-list"></div></section>
+<section id="updates"><h2>Updates</h2><p id="update">Metadata unavailable.</p></section>
+<section id="settings"><h2>Settings</h2><p>Package injection is disabled by default. This UI has no shell endpoint and does not bind a network listener.</p></section>
+</main><dialog id="confirm"><form method="dialog"><p id="confirm-text"></p><button value="cancel">Cancel</button><button id="approve" value="confirm">Apply</button></form></dialog><script src="app.js"></script></body></html>
