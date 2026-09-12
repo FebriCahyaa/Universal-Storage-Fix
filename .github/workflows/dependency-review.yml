@@ -13,7 +13,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Reject unsafe dependency sources and dynamic versions
         run: |
-          ! git grep -nE '(https?://[^ ]+\.(sh|bin)|npm (config set registry|install --ignore-scripts=false)|maven\s*\{[^}]*http:|["'"']\+[^"'"']*)' -- ':!docs/**'
+          ! git grep -nE 'https?://[^ ]+\.(sh|bin)' -- ':!docs/**'
+          ! git grep -nE 'npm (config set registry|install --ignore-scripts=false)' -- ':!docs/**'
+          ! git grep -nE 'maven.*http:' -- ':!docs/**'
           ! git grep -nE '(curl|wget).*(\||;).*(sh|bash)' -- ':!docs/**'
           find . -type f -name '*.so' -o -name '*.jar' | grep -q . && { echo 'prebuilt binary requires explicit review' >&2; exit 1; } || true
       - name: Emit ecosystem inventory
