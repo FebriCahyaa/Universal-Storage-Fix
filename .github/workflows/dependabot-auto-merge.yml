@@ -1,0 +1,23 @@
+name: Dependabot auto-merge policy
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  review-required:
+    if: github.actor == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assess risk without executing PR code
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          FILES_URL: ${{ github.event.pull_request.url }}/files
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          files=$(gh api "$FILES_URL" --paginate --jq '.[].filename')
+          printf '%s\n' "$files"
+          echo "$files" | grep -E '(^module/|^native/|^tools/security/|^tools/telegram/|^update.json$|^\.github/workflows/.*release|sign|keystore)' && { echo 'Privileged or release-sensitive change: manual review required.'; exit 0; } || true
+          echo "$TITLE" | grep -Ei '(major|breaking)' && { echo 'Major or breaking update: manual review required.'; exit 0; } || true
+          echo 'Auto-merge is deliberately disabled. Repository branch protection and required checks must be configured and reviewed before enabling it.'

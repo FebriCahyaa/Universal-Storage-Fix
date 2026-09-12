@@ -21,4 +21,8 @@ MediaStore and SAF require an Android app context and user-granted URI permissio
 
 `make test package checksums` builds host-native tests and the installable ZIP. `make verify` also checks the manifest and release metadata. SHA-256 detects modification, not release identity; use a signed GitHub release when signatures are introduced.
 
+## Dependency updates
+
+Dependabot maintains GitHub Actions weekly. No Gradle, Android, npm/Vue, Docker, or lockfile manifests exist, so those ecosystems are not configured. Dependabot updates are validated but never auto-merged; see [dependency policy](docs/DEPENDENCY_POLICY.md) and [update system](docs/UPDATE_SYSTEM.md).
+
 See `docs/` for architecture, compatibility, security, installation, update, test, and release details.

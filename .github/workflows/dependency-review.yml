@@ -1,0 +1,34 @@
+name: Dependency review
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject unsafe dependency sources and dynamic versions
+        run: |
+          ! git grep -nE '(https?://[^ ]+\.(sh|bin)|npm (config set registry|install --ignore-scripts=false)|maven\s*\{[^}]*http:|["'"']\+[^"'"']*)' -- ':!docs/**'
+          ! git grep -nE '(curl|wget).*(\||;).*(sh|bash)' -- ':!docs/**'
+          find . -type f -name '*.so' -o -name '*.jar' | grep -q . && { echo 'prebuilt binary requires explicit review' >&2; exit 1; } || true
+      - name: Emit ecosystem inventory
+        run: |
+          find . -type f \( -name package.json -o -name package-lock.json -o -name build.gradle -o -name build.gradle.kts -o -name Cargo.toml -o -name go.mod \) -print | sort | tee dependency-manifests.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependency-review-inventory
+          path: dependency-manifests.txt
+  github-dependency-review:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4

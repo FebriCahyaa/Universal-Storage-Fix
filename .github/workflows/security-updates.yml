@@ -1,0 +1,36 @@
+name: Security updates
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '23 5 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  security-events: write
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell and secret-pattern review
+        run: |
+          sh -n module/action.sh module/service.sh module/lib/usf.sh tools/security/generate-checksums.sh tools/security/verify-checksums.sh tools/telegram/notify-build.sh tools/dependencies/report-updates.sh
+          ! git grep -nE '(gh[pousr]_[A-Za-z0-9_]{20,}|TELEGRAM_BOT_TOKEN=[^$]|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY)' -- ':!docs/**'
+      - name: Optional scanner availability report
+        run: |
+          for tool in shellcheck actionlint osv-scanner trivy semgrep; do command -v "$tool" >/dev/null 2>&1 && echo "$tool available" || echo "$tool unavailable (optional)"; done | tee security-tool-availability.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: security-tool-availability
+          path: security-tool-availability.txt
+  codeql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: cpp
+      - uses: github/codeql-action/autobuild@v3
+      - uses: github/codeql-action/analyze@v3

@@ -1,0 +1,71 @@
+name: Dependency update validation
+on:
+  pull_request:
+    paths:
+      - '.github/dependabot.yml'
+      - '.github/workflows/**'
+      - 'CMakeLists.txt'
+      - 'native/**'
+      - 'Makefile'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'android/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      dependabot: ${{ steps.classify.outputs.dependabot }}
+    steps:
+      - id: classify
+        env:
+          ACTOR: ${{ github.actor }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ "$ACTOR" = 'dependabot[bot]' ] && [ "$HEAD_REPOSITORY" = "$REPOSITORY" ]; then echo 'dependabot=true' >> "$GITHUB_OUTPUT"; else echo 'dependabot=false' >> "$GITHUB_OUTPUT"; fi
+  validate:
+    needs: gate
+    if: needs.gate.outputs.dependabot == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Repository and YAML checks
+        run: |
+          git status --porcelain
+          ruby -e 'require "yaml"; Dir[".github/**/*.yml"].each { |f| YAML.load_file(f); puts "valid YAML: #{f}" }'
+          test -f .github/dependabot.yml
+          test -f module/module.prop
+          ! git diff --check HEAD^ HEAD | grep -q .
+      - name: Shell and privileged-path checks
+        run: |
+          sh -n module/action.sh module/service.sh module/lib/usf.sh tools/security/generate-checksums.sh tools/security/verify-checksums.sh tools/telegram/notify-build.sh tools/dependencies/report-updates.sh
+          ! git diff HEAD^ HEAD -- module tools | grep -E '(^\+.*(curl.*\||wget.*\||chmod 777|rm -rf /|setenforce 0))'
+      - name: Native build and tests
+        run: make test
+      - name: Package and integrity
+        run: make package checksums && tools/security/verify-checksums.sh dist/SHA256SUMS
+      - name: Generate validation report
+        env:
+          USF_DEPENDENCY_ECOSYSTEM: github-actions
+          USF_COMPATIBILITY_STATUS: native-host-validated
+          USF_BUILD_STATUS: passed
+          USF_TEST_STATUS: passed
+          USF_MERGE_STATUS: manual-review-required
+        run: tools/dependencies/report-updates.sh --format=markdown > dependency-update-report.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependency-update-report
+          path: dependency-update-report.md
+      - name: Comment validation summary
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body: 'Dependency validation passed: YAML, shell, native tests, package, and SHA-256 checks completed. Auto-merge remains disabled by policy.'});
