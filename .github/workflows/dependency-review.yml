@@ -10,7 +10,7 @@ jobs:
   policy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Reject unsafe dependency sources and dynamic versions
         run: |
           ! git grep -nE 'https?://[^ ]+\.(sh|bin)' -- ':!docs/**'
@@ -32,5 +32,5 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/dependency-review-action@v4
