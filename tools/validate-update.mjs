@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { readFileSync } = require('node:fs');
+import { readFileSync } from 'node:fs';
 const file = process.argv[2];
 if (!file) throw new Error('Usage: validate-update.mjs update.json');
 const x = JSON.parse(readFileSync(file, 'utf8'));
