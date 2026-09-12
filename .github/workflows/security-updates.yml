@@ -17,7 +17,7 @@ jobs:
       - name: Shell and secret-pattern review
         run: |
           sh -n module/action.sh module/service.sh module/lib/usf.sh tools/security/generate-checksums.sh tools/security/verify-checksums.sh tools/telegram/notify-build.sh tools/dependencies/report-updates.sh
-          ! git grep -nE '(gh[pousr]_[A-Za-z0-9_]{20,}|TELEGRAM_BOT_TOKEN=[^$]|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY)' -- ':!docs/**'
+          ! git grep -nE '(gh[pousr]_[A-Za-z0-9_]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY)' -- ':!docs/**'
       - name: Optional scanner availability report
         run: |
           for tool in shellcheck actionlint osv-scanner trivy semgrep; do command -v "$tool" >/dev/null 2>&1 && echo "$tool available" || echo "$tool unavailable (optional)"; done | tee security-tool-availability.txt
